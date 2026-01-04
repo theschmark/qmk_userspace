@@ -1,9 +1,12 @@
 VIA_ENABLE = yes
+
 DYNAMIC_MACRO_ENABLE = yes
+
 CAPS_WORD_ENABLE = yes
+
 OS_DETECTION_ENABLE = yes
 
 KEY_OVERRIDE_ENABLE = yes
-include $(MAIN_KEYMAP_PATH_1)/qmk-vim/rules.mk
 
+# Debugging
 # CONSOLE_ENABLE = yes

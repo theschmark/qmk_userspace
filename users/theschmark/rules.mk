@@ -1,0 +1,1 @@
+include $(USER_SPACE)/qmk-vim/rules.mk
