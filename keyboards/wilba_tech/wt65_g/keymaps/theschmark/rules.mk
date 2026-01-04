@@ -5,3 +5,5 @@ OS_DETECTION_ENABLE = yes
 
 KEY_OVERRIDE_ENABLE = yes
 include $(MAIN_KEYMAP_PATH_1)/qmk-vim/rules.mk
+
+# CONSOLE_ENABLE = yes

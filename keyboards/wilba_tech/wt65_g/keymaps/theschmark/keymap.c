@@ -5,8 +5,8 @@ enum layers {
 	MAC_LAYER = 0, // Default for mac connection, FN + Super to enable
 	WIN_LAYER,  // Default for windows connection, FN + Alt to enable
 	NAV_LAYER,  // Common navigation
-	SAVE_LAYER,  // OSL from FN + Top Right
 	FN_LAYER, // FN
+	SAVE_LAYER,  // OSL from FN + Top Right
 };
 
 enum custom_keycodes {
@@ -44,19 +44,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_TRNS, KC_TRNS, KC_TRNS,                            VIM_ON,                             KC_TRNS, KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS),
 
 
-[SAVE_LAYER] = LAYOUT_all( // OSL from FN Layer
-		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, DM_RSTP,
-		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,          DM_REC1,
-		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,                   DM_REC2,
-		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,          KC_TRNS, KC_TRNS,
-		KC_TRNS, PDF(WIN_LAYER), PDF(MAC_LAYER),              KC_TRNS,                            KC_TRNS, KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS),
-
 	[FN_LAYER] = LAYOUT_all(
-		KC_TRNS,  KC_F1,  KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_TRNS, KC_TRNS, OSL(SAVE_LAYER),
+		KC_TRNS,  KC_F1,  KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_TRNS, KC_TRNS, MO(SAVE_LAYER),
 		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,          DM_PLY1,
 		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,                   DM_PLY2,
 		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,          KC_VOLU, KC_TRNS,
 		KC_TRNS, TO(WIN_LAYER), TO(MAC_LAYER),             KC_TRNS,                            KC_TRNS, KC_TRNS,             KC_MUTE, KC_VOLD, KC_MUTE),
+
+    [SAVE_LAYER] = LAYOUT_all( // OSL from FN Layer
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,          DM_REC1,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,                   DM_REC2,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,          KC_TRNS, KC_TRNS,
+		KC_TRNS, PDF(WIN_LAYER), PDF(MAC_LAYER),              KC_TRNS,                            KC_TRNS, KC_TRNS,          KC_TRNS, KC_TRNS, KC_TRNS),
 };
 
 void update_vim_from_state(layer_state_t state) {
@@ -69,6 +69,8 @@ void update_vim_from_state(layer_state_t state) {
 
 // Fix the default layer state bsed on the default_layer_state from eeprom at startup
 void keyboard_post_init_user(void) {
+	// debug_enable=true;
+
     layer_state_set(default_layer_state);
 
 	// Called as it's not clear if layer_state_set_user is called from the above
