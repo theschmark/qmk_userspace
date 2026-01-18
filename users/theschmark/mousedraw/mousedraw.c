@@ -8,7 +8,7 @@
 
 static int report_interval = 8;
 static float font_size = 90.0f;
-static float draw_speed = 0.02f;
+static float draw_speed = 4.0f;
 
 void mousedraw_inc_font() {
     font_size += 10.0f;
@@ -17,10 +17,10 @@ void mousedraw_dec_font() {
     font_size -= 10.0f;
 }
 void mousedraw_inc_speed() {
-    draw_speed += 0.01f;
+    draw_speed += 0.25f;
 }
 void mousedraw_dec_speed() {
-    draw_speed -= 0.01f;
+    draw_speed -= 0.25f;
 }
 void mousedraw_inc_interval() {
     report_interval += 2;
@@ -73,40 +73,47 @@ void mousedraw_stop_record(void) {
 
 void mousedraw_play(bool mouse_held) {
     if (!is_recording && record_len > 0) {
-        is_drawing = true; cur_char = 0; cur_seg = 0; t_prog = 0;
-        word_x_off = 0; sub_x = 0; sub_y = 0;
-        last_abs = (Point){0,0}; seg_start = (Point){0,0};
-        defer_exec(report_interval, drawing_callback, NULL);
+        if (is_drawing) {
+            is_drawing = false;
+        } else {
+            is_drawing = true; cur_char = 0; cur_seg = 0; t_prog = 0;
+            word_x_off = 0; sub_x = 0; sub_y = 0;
+            last_abs = (Point){0,1.0f}; seg_start = (Point){0,1.0};
+            defer_exec(report_interval, drawing_callback, NULL);
+        }
     }
 }
 
 // --- Glyph Library ---
 // Normalized coordinates: y=0.0 (top), y=1.0 (baseline), y=1.3 (descender)
-static const Segment char_a[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.1},{0.1,0.1},{0.1,0.6}}, {CURVE,{0.1,1.0},{0.8,1.0},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_b[] = {{MOVE,{0,0},{0,0},{0.2,0.0}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.2,0.7}}, {CURVE,{0.2,0.4},{0.8,0.4},{0.8,0.7}}, {CURVE,{0.8,1.0},{0.2,1.0},{0.2,1.0}}};
-static const Segment char_c[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.3},{0.2,0.3},{0.2,0.6}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.8}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_d[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.1},{0.2,0.1},{0.2,0.5}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.5}}, {MOVE,{0,0},{0,0},{0.8,0.0}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
+// Every letter now explicitly ends with a MOVE to {width, 1.0} 
+// to 'zero out' the vertical drift before the next char starts.
+
+static const Segment char_a[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.1},{0.1,0.1},{0.1,0.6}}, {CURVE,{0.1,1.0},{0.8,1.0},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_b[] = {{MOVE,{0,0},{0,0},{0.2,0.0}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.2,0.7}}, {CURVE,{0.2,0.4},{0.8,0.4},{0.8,0.7}}, {CURVE,{0.8,1.0},{0.2,1.0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_c[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.3},{0.2,0.3},{0.2,0.6}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
+static const Segment char_d[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.1},{0.2,0.1},{0.2,0.5}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.5}}, {MOVE,{0,0},{0,0},{0.8,0.0}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_e[] = {{MOVE,{0,0},{0,0},{0.2,0.7}}, {LINE,{0,0},{0,0},{0.8,0.7}}, {CURVE,{0.8,0.3},{0.2,0.3},{0.2,0.6}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,1.0}}};
-static const Segment char_f[] = {{MOVE,{0,0},{0,0},{0.7,0.1}}, {CURVE,{0.5,0.0},{0.3,0.0},{0.3,0.2}}, {LINE,{0,0},{0,0},{0.3,1.0}}, {MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.5,0.4}}, {MOVE,{0,0},{0,0},{0.5,1.0}}};
-static const Segment char_g[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.1},{0.2,0.1},{0.2,0.5}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.3}}, {CURVE,{0.8,1.5},{0.1,1.5},{0.1,1.0}}};
-static const Segment char_h[] = {{MOVE,{0,0},{0,0},{0.2,0.0}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.2,0.6}}, {CURVE,{0.2,0.3},{0.8,0.3},{0.8,0.6}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
+static const Segment char_f[] = {{MOVE,{0,0},{0,0},{0.7,0.1}}, {CURVE,{0.5,0.0},{0.3,0.0},{0.3,0.2}}, {LINE,{0,0},{0,0},{0.3,1.0}}, {MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.5,0.4}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
+static const Segment char_g[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.1},{0.2,0.1},{0.2,0.5}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.3}}, {CURVE,{0.8,1.5},{0.1,1.5},{0.1,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_h[] = {{MOVE,{0,0},{0,0},{0.2,0.0}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.2,0.6}}, {CURVE,{0.2,0.3},{0.8,0.3},{0.8,0.6}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_i[] = {{MOVE,{0,0},{0,0},{0.5,0.4}}, {LINE,{0,0},{0,0},{0.5,1.0}}, {MOVE,{0,0},{0,0},{0.5,0.1}}, {LINE,{0,0},{0,0},{0.5,0.15}}, {MOVE,{0,0},{0,0},{0.5,1.0}}};
 static const Segment char_j[] = {{MOVE,{0,0},{0,0},{0.6,0.4}}, {LINE,{0,0},{0,0},{0.6,1.3}}, {CURVE,{0.6,1.5},{0.1,1.5},{0.1,1.0}}, {MOVE,{0,0},{0,0},{0.6,0.1}}, {LINE,{0,0},{0,0},{0.6,0.15}}, {MOVE,{0,0},{0,0},{0.6,1.0}}};
-static const Segment char_k[] = {{MOVE,{0,0},{0,0},{0.2,0.0}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.7,0.4}}, {LINE,{0,0},{0,0},{0.2,0.7}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_l[] = {{MOVE,{0,0},{0,0},{0.4,0.0}}, {LINE,{0,0},{0,0},{0.4,1.0}}};
-static const Segment char_m[] = {{MOVE,{0,0},{0,0},{0.1,1.0}}, {LINE,{0,0},{0,0},{0.1,0.4}}, {CURVE,{0.1,0.2},{0.45,0.2},{0.45,0.5}}, {LINE,{0,0},{0,0},{0.45,1.0}}, {MOVE,{0,0},{0,0},{0.45,0.5}}, {CURVE,{0.45,0.2},{0.8,0.2},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_n[] = {{MOVE,{0,0},{0,0},{0.2,1.0}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {CURVE,{0.2,0.2},{0.8,0.2},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_o[] = {{MOVE,{0,0},{0,0},{0.5,0.3}}, {CURVE,{0.1,0.3},{0.1,1.0},{0.5,1.0}}, {CURVE,{0.9,1.0},{0.9,0.3},{0.5,0.3}}, {MOVE,{0,0},{0,0},{0.5,1.0}}};
-static const Segment char_p[] = {{MOVE,{0,0},{0,0},{0.2,1.3}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {CURVE,{0.2,0.2},{0.8,0.2},{0.8,0.5}}, {CURVE,{0.8,0.9},{0.2,0.9},{0.2,1.0}}};
-static const Segment char_q[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.2},{0.2,0.2},{0.2,0.5}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.3}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
+static const Segment char_k[] = {{MOVE,{0,0},{0,0},{0.2,0.0}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.7,0.4}}, {LINE,{0,0},{0,0},{0.2,0.7}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_l[] = {{MOVE,{0,0},{0,0},{0.4,0.0}}, {LINE,{0,0},{0,0},{0.4,1.0}}, {MOVE,{0,0},{0,0},{0.5,1.0}}};
+static const Segment char_m[] = {{MOVE,{0,0},{0,0},{0.1,1.0}}, {LINE,{0,0},{0,0},{0.1,0.4}}, {CURVE,{0.1,0.2},{0.45,0.2},{0.45,0.5}}, {LINE,{0,0},{0,0},{0.45,1.0}}, {MOVE,{0,0},{0,0},{0.45,0.5}}, {CURVE,{0.45,0.2},{0.8,0.2},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{1.3,1.0}}};
+static const Segment char_n[] = {{MOVE,{0,0},{0,0},{0.2,1.0}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {CURVE,{0.2,0.2},{0.8,0.2},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_o[] = {{MOVE,{0,0},{0,0},{0.5,0.3}}, {CURVE,{0.1,0.3},{0.1,1.0},{0.5,1.0}}, {CURVE,{0.9,1.0},{0.9,0.3},{0.5,0.3}}, {MOVE,{0,0},{0,0},{1.0,1.0}}};
+static const Segment char_p[] = {{MOVE,{0,0},{0,0},{0.2,1.3}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {CURVE,{0.2,0.2},{0.8,0.2},{0.8,0.5}}, {CURVE,{0.8,0.9},{0.2,0.9},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_q[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.2},{0.2,0.2},{0.2,0.5}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.3}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_r[] = {{MOVE,{0,0},{0,0},{0.2,1.0}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {MOVE,{0,0},{0,0},{0.2,0.6}}, {CURVE,{0.2,0.3},{0.6,0.3},{0.8,0.5}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_s[] = {{MOVE,{0,0},{0,0},{0.8,0.4}}, {CURVE,{0.1,0.3},{0.1,0.6},{0.5,0.6}}, {CURVE,{0.9,0.6},{0.9,1.0},{0.2,1.0}}};
-static const Segment char_t[] = {{MOVE,{0,0},{0,0},{0.4,0.1}}, {LINE,{0,0},{0,0},{0.4,0.9}}, {CURVE,{0.4,1.0},{0.6,1.0},{0.7,1.0}}, {MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.6,0.4}}, {MOVE,{0,0},{0,0},{0.6,1.0}}};
-static const Segment char_u[] = {{MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.2,0.8}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.8}}, {LINE,{0,0},{0,0},{0.8,0.4}}, {MOVE,{0,0},{0,0},{0.8,0.8}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_v[] = {{MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.5,1.0}}, {LINE,{0,0},{0,0},{0.9,0.4}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
-static const Segment char_w[] = {{MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.3,1.0}}, {LINE,{0,0},{0,0},{0.5,0.6}}, {LINE,{0,0},{0,0},{0.7,1.0}}, {LINE,{0,0},{0,0},{0.9,0.4}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
-static const Segment char_x[] = {{MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.8,0.4}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_y[] = {{MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.5,1.0}}, {LINE,{0,0},{0,0},{0.9,0.4}}, {MOVE,{0,0},{0,0},{0.5,1.0}}, {LINE,{0,0},{0,0},{0.2,1.5}}, {MOVE,{0,0},{0,0},{0.5,1.0}}};
+static const Segment char_s[] = {{MOVE,{0,0},{0,0},{0.8,0.4}}, {CURVE,{0.1,0.3},{0.1,0.6},{0.5,0.6}}, {CURVE,{0.9,0.6},{0.9,1.0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
+static const Segment char_t[] = {{MOVE,{0,0},{0,0},{0.4,0.1}}, {LINE,{0,0},{0,0},{0.4,0.9}}, {CURVE,{0.4,1.0},{0.6,1.0},{0.7,1.0}}, {MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.6,0.4}}, {MOVE,{0,0},{0,0},{0.7,1.0}}};
+static const Segment char_u[] = {{MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.2,0.8}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.8}}, {LINE,{0,0},{0,0},{0.8,0.4}}, {MOVE,{0,0},{0,0},{0.8,0.8}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_v[] = {{MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.5,1.0}}, {LINE,{0,0},{0,0},{0.9,0.4}}, {MOVE,{0,0},{0,0},{1.0,1.0}}};
+static const Segment char_w[] = {{MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.3,1.0}}, {LINE,{0,0},{0,0},{0.5,0.6}}, {LINE,{0,0},{0,0},{0.7,1.0}}, {LINE,{0,0},{0,0},{0.9,0.4}}, {MOVE,{0,0},{0,0},{1.3,1.0}}};
+static const Segment char_x[] = {{MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.8,0.4}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
+static const Segment char_y[] = {{MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.5,1.0}}, {LINE,{0,0},{0,0},{0.9,0.4}}, {MOVE,{0,0},{0,0},{0.5,1.0}}, {LINE,{0,0},{0,0},{0.2,1.5}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_z[] = {{MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.8,0.4}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {LINE,{0,0},{0,0},{0.8,1.0}}};
 static const Segment char_sp[] = {};
 
@@ -138,6 +145,15 @@ Point get_point(Segment s, Point start, float t) {
         p.y = start.y + t * (s.dest.y - start.y);
     }
     return p;
+}
+
+// Replace your t_prog increment with this logic
+float segment_length(Segment s, Point start) {
+    if (s.type == LINE || s.type == MOVE) {
+        return sqrtf(powf(s.dest.x - start.x, 2) + powf(s.dest.y - start.y, 2));
+    }
+    // Approximation for Bezier length
+    return sqrtf(powf(s.dest.x - start.x, 2) + powf(s.dest.y - start.y, 2)) * 1.2f;
 }
 
 // Add this to your state variables
@@ -189,7 +205,13 @@ uint32_t drawing_callback(uint32_t trigger_time, void *cb_arg) {
     host_mouse_send(&report);
 
     last_abs = (Point){wx, wy};
-    t_prog += draw_speed;
+
+    // Inside the callback:
+    float seg_len = segment_length(s, seg_start);
+    // Instead of a fixed increment, scale by length so speed is constant px/report
+    float velocity_step = (draw_speed/ (seg_len * font_size)); 
+    t_prog += velocity_step;
+    // t_prog += draw_speed;
 
     if (t_prog >= 1.0f) {
         t_prog = 0; 
