@@ -122,6 +122,7 @@ uint32_t drawing_callback(uint32_t trigger_time, void *cb_arg) {
     if (!is_drawing) return 0;
     const Glyph* g = record_buffer[cur_char];
 
+    // Handle Space
     if (g->segment_count == 0) {
         word_x_off += g->width;
         if (++cur_char >= record_len) { is_drawing = false; return 0; }
@@ -130,14 +131,27 @@ uint32_t drawing_callback(uint32_t trigger_time, void *cb_arg) {
 
     Segment s = g->segments[cur_seg];
     Point p = get_point(s, seg_start, t_prog);
-    float wx = (p.x + word_x_off) * FONT_SIZE, wy = p.y * FONT_SIZE;
+    
+    // Calculate Target World Position
+    float wx = (p.x + word_x_off) * FONT_SIZE;
+    float wy = p.y * FONT_SIZE;
 
-    if (s.type != MOVE) {
-        float dx = (wx - last_abs.x) + sub_x, dy = (wy - last_abs.y) + sub_y;
-        int8_t rx = (int8_t)roundf(dx), ry = (int8_t)roundf(dy);
-        sub_x = dx - rx; sub_y = dy - ry;
-        if (rx != 0 || ry != 0) host_mouse_send(&(report_mouse_t){.x = rx, .y = ry});
-    } else { sub_x = 0; sub_y = 0; }
+    // --- FIX STARTS HERE ---
+    // Always calculate and send deltas, even for MOVE segments.
+    // The mouse must physically travel to the new start point.
+    float dx = (wx - last_abs.x) + sub_x;
+    float dy = (wy - last_abs.y) + sub_y;
+    
+    int8_t rx = (int8_t)roundf(dx);
+    int8_t ry = (int8_t)roundf(dy);
+    
+    sub_x = dx - rx; 
+    sub_y = dy - ry;
+
+    if (rx != 0 || ry != 0) {
+        host_mouse_send(&(report_mouse_t){.x = rx, .y = ry});
+    }
+    // --- FIX ENDS HERE ---
 
     last_abs = (Point){wx, wy};
     t_prog += DRAW_SPEED;
@@ -145,7 +159,8 @@ uint32_t drawing_callback(uint32_t trigger_time, void *cb_arg) {
     if (t_prog >= 1.0f) {
         t_prog = 0; seg_start = s.dest;
         if (++cur_seg >= g->segment_count) {
-            word_x_off += g->width; cur_seg = 0; seg_start = (Point){0,0};
+            word_x_off += g->width; 
+            cur_seg = 0; seg_start = (Point){0,0};
             if (++cur_char >= record_len) { is_drawing = false; return 0; }
         }
     }
