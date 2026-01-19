@@ -78,7 +78,7 @@ void mousedraw_play(bool mouse_held) {
         } else {
             is_drawing = true; cur_char = 0; cur_seg = 0; t_prog = 0;
             word_x_off = 0; sub_x = 0; sub_y = 0;
-            last_abs = (Point){0,1.0f}; seg_start = (Point){0,1.0};
+            last_abs = (Point){0,0.0f}; seg_start = (Point){0,-1.0f};
             defer_exec(report_interval, drawing_callback, NULL);
         }
     }
