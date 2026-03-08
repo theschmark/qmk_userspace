@@ -1,5 +1,5 @@
 # Bootloader selection
-BOOTLOADER = rp2040
+BOOTLOADER = uf2boot
 
 VIA_ENABLE = yes
 
