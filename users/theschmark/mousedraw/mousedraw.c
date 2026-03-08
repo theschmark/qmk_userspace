@@ -10,6 +10,14 @@ static int report_interval = 8;
 static float font_size = 90.0f;
 static float draw_speed = 4.0f;
 
+
+__attribute__((weak)) void mousedraw_start_record_user(void) {
+    // Do nothing
+}
+__attribute__((weak)) void mousedraw_stop_record_user(void) {
+    // Do nothing
+}
+
 void mousedraw_inc_font() {
     font_size += 10.0f;
 }
@@ -62,12 +70,14 @@ uint32_t drawing_callback(uint32_t trigger_time, void *cb_arg);
 
 // API
 void mousedraw_start_record(void) {
+    mousedraw_start_record_user();
     record_len = 0;
     is_drawing = false;
     is_recording = true;
 }
 
 void mousedraw_stop_record(void) {
+    mousedraw_stop_record_user();
     is_recording = false;
 }
 
@@ -78,7 +88,7 @@ void mousedraw_play(bool mouse_held) {
         } else {
             is_drawing = true; cur_char = 0; cur_seg = 0; t_prog = 0;
             word_x_off = 0; sub_x = 0; sub_y = 0;
-            last_abs = (Point){0,0.0f}; seg_start = (Point){0,-1.0f};
+            last_abs = (Point){0,0.0f}; seg_start = (Point){0,0.0f};
             defer_exec(report_interval, drawing_callback, NULL);
         }
     }
@@ -101,13 +111,13 @@ static const Segment char_i[] = {{MOVE,{0,0},{0,0},{0.5,0.4}}, {LINE,{0,0},{0,0}
 static const Segment char_j[] = {{MOVE,{0,0},{0,0},{0.6,0.4}}, {LINE,{0,0},{0,0},{0.6,1.3}}, {CURVE,{0.6,1.5},{0.1,1.5},{0.1,1.0}}, {MOVE,{0,0},{0,0},{0.6,0.1}}, {LINE,{0,0},{0,0},{0.6,0.15}}, {MOVE,{0,0},{0,0},{0.6,1.0}}};
 static const Segment char_k[] = {{MOVE,{0,0},{0,0},{0.2,0.0}}, {LINE,{0,0},{0,0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.7,0.4}}, {LINE,{0,0},{0,0},{0.2,0.7}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_l[] = {{MOVE,{0,0},{0,0},{0.4,0.0}}, {LINE,{0,0},{0,0},{0.4,1.0}}, {MOVE,{0,0},{0,0},{0.5,1.0}}};
-static const Segment char_m[] = {{MOVE,{0,0},{0,0},{0.1,1.0}}, {LINE,{0,0},{0,0},{0.1,0.4}}, {CURVE,{0.1,0.2},{0.45,0.2},{0.45,0.5}}, {LINE,{0,0},{0,0},{0.45,1.0}}, {MOVE,{0,0},{0,0},{0.45,0.5}}, {CURVE,{0.45,0.2},{0.8,0.2},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{1.3,1.0}}};
+static const Segment char_m[] = {{MOVE,{0,0},{0,0},{0.1,1.0}}, {LINE,{0,0},{0,0},{0.1,0.4}}, {CURVE,{0.1,0.2},{0.4,0.2},{0.4,0.5}}, {LINE,{0,0},{0,0},{0.4,1.0}}, {MOVE,{0,0},{0,0},{0.4,0.5}}, {CURVE,{0.4,0.2},{0.7,0.2},{0.7,0.5}}, {LINE,{0,0},{0,0},{0.7,1.0}}, {MOVE,{0,0},{0,0},{1.3,1.0}} };
 static const Segment char_n[] = {{MOVE,{0,0},{0,0},{0.2,1.0}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {CURVE,{0.2,0.2},{0.8,0.2},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_o[] = {{MOVE,{0,0},{0,0},{0.5,0.3}}, {CURVE,{0.1,0.3},{0.1,1.0},{0.5,1.0}}, {CURVE,{0.9,1.0},{0.9,0.3},{0.5,0.3}}, {MOVE,{0,0},{0,0},{1.0,1.0}}};
 static const Segment char_p[] = {{MOVE,{0,0},{0,0},{0.2,1.3}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {CURVE,{0.2,0.2},{0.8,0.2},{0.8,0.5}}, {CURVE,{0.8,0.9},{0.2,0.9},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_q[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.8,0.2},{0.2,0.2},{0.2,0.5}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.5}}, {LINE,{0,0},{0,0},{0.8,1.3}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_r[] = {{MOVE,{0,0},{0,0},{0.2,1.0}}, {LINE,{0,0},{0,0},{0.2,0.4}}, {MOVE,{0,0},{0,0},{0.2,0.6}}, {CURVE,{0.2,0.3},{0.6,0.3},{0.8,0.5}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
-static const Segment char_s[] = {{MOVE,{0,0},{0,0},{0.8,0.4}}, {CURVE,{0.1,0.3},{0.1,0.6},{0.5,0.6}}, {CURVE,{0.9,0.6},{0.9,1.0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
+static const Segment char_s[] = {{MOVE,{0,0},{0,0},{0.8,0.5}}, {CURVE,{0.1,0.3},{0.1,0.6},{0.5,0.6}}, {CURVE,{0.9,0.6},{0.9,1.0},{0.2,1.0}}, {MOVE,{0,0},{0,0},{0.8,1.0}}};
 static const Segment char_t[] = {{MOVE,{0,0},{0,0},{0.4,0.1}}, {LINE,{0,0},{0,0},{0.4,0.9}}, {CURVE,{0.4,1.0},{0.6,1.0},{0.7,1.0}}, {MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.6,0.4}}, {MOVE,{0,0},{0,0},{0.7,1.0}}};
 static const Segment char_u[] = {{MOVE,{0,0},{0,0},{0.2,0.4}}, {LINE,{0,0},{0,0},{0.2,0.8}}, {CURVE,{0.2,1.0},{0.8,1.0},{0.8,0.8}}, {LINE,{0,0},{0,0},{0.8,0.4}}, {MOVE,{0,0},{0,0},{0.8,0.8}}, {LINE,{0,0},{0,0},{0.8,1.0}}, {MOVE,{0,0},{0,0},{0.9,1.0}}};
 static const Segment char_v[] = {{MOVE,{0,0},{0,0},{0.1,0.4}}, {LINE,{0,0},{0,0},{0.5,1.0}}, {LINE,{0,0},{0,0},{0.9,0.4}}, {MOVE,{0,0},{0,0},{1.0,1.0}}};
@@ -119,9 +129,9 @@ static const Segment char_sp[] = {};
 
 static const Glyph glyph_a={char_a,4,0.9f},  glyph_b={char_b,5,0.9f},  glyph_c={char_c,4,0.8f},  glyph_d={char_d,5,0.9f},
             glyph_e={char_e,4,0.8f},  glyph_f={char_f,6,0.8f},  glyph_g={char_g,5,0.9f},  glyph_h={char_h,5,0.8f},
-            glyph_i={char_i,5,0.5f},  glyph_j={char_j,6,0.5f},  glyph_k={char_k,5,0.8f},  glyph_l={char_l,2,0.5f},
-            glyph_m={char_m,7,1.3f},  glyph_n={char_n,4,0.9f},  glyph_o={char_o,4,0.9f},  glyph_p={char_p,4,0.9f},
-            glyph_q={char_q,5,0.9f},  glyph_r={char_r,5,0.8f},  glyph_s={char_s,3,0.8f},  glyph_t={char_t,6,0.5f},
+            glyph_i={char_i,5,0.8f},  glyph_j={char_j,6,0.5f},  glyph_k={char_k,5,0.8f},  glyph_l={char_l,2,0.5f},
+            glyph_m={char_m,8,1.0f},  glyph_n={char_n,4,0.9f},  glyph_o={char_o,4,0.9f},  glyph_p={char_p,4,0.9f},
+            glyph_q={char_q,5,0.9f},  glyph_r={char_r,5,0.8f},  glyph_s={char_s,4,1.4f},  glyph_t={char_t,6,0.5f},
             glyph_u={char_u,6,0.9f},  glyph_v={char_v,4,0.9f},  glyph_w={char_w,6,1.3f},  glyph_x={char_x,5,0.9f},
             glyph_y={char_y,6,0.9f},  glyph_z={char_z,4,0.8f},  glyph_space={char_sp,0,0.6f};
 
