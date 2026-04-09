@@ -6,6 +6,7 @@
         ["swagkeys/eave", "theschmark"],
         ["swagkeys/shelby65", "theschmark"],
         ["wolf/kohaku", "theschmark"],
-        ["schmark/mia", "theschmark"]
+        ["schmark/mia", "theschmark"],
+        ["schmark/wolf_kohaku", "theschmark"]
     ]
 }
