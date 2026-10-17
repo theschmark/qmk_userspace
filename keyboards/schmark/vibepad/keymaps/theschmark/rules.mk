@@ -1,0 +1,6 @@
+MCU = RP2040
+BOOTLOADER = rp2040
+VIA_ENABLE = yes
+
+# Debugging
+# CONSOLE_ENABLE = yes
